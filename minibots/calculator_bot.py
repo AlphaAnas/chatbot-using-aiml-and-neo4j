@@ -1,43 +1,125 @@
-'''steps :
- 1. split the given expression into parts like : cosine(45)+45 = > 'cosine(45)', '+', '45'
- 2. send each element to its respective function.
- 3. First calculate trignometric functions and get their answers.
- 4. Then perform add/ sub or any other operation to the answers and elements.
- 5. Generate a final answer to return.
-'''
-
+'code in progress' 
 import math
 import re
+import nltk
+def isoperand(inp):
+    if inp.isdigit():
+        return 1
+    elif any(func in inp for func in ['sin', 'cos', 'tan']):
+        return 1
+         
+    return 0
+
+def isoperator(inp):
+    lst=['+','-','/','*','%']
+    if inp in lst:
+        return True
+    else:
+        return False
+
+def infix_to_postfix(exp):
+    precedence={"+":1,"-":1,"*":2,"/":2,"^":3,"**":3}
+    output = ''
+    stack = []
+    for ele in exp:
+        if not(ele)==' ':
+ 
+            if ele ==')':
+                while stack and stack[-1] != '(':
+                        output += stack.pop(-1)
+                if stack and stack[-1] =='(':
+                        stack.pop(-1)
+        
+            elif ele == '(':
+                stack.append(ele)
+        
+            elif isoperand(ele):
+                output += str(ele)
+            else: # precedence is higher of the operator
+              
+              
+                while not(ele)==' ' and stack and precedence.get(ele,0) <= precedence.get(stack[-1],0):
+                    output += stack.pop(-1)
+                stack.append(ele)
+    # empty the stack
+    while stack:
+        output += stack.pop(-1)
+    return output
+
+        
+
 
 def callCalculate(name,exp):
+    mode ='radians'
     print(f'Hello {name}')
-    if "calculate" in exp:
-        exp = exp[9:] #after calculate_
-        parts = re.split(r'([+\-*/()])',exp) #splits the expression
+    print('Mode : radians')
+    # if any(func in exp for func in ['sin', 'cos', 'tan']):
+    #     inp = input('Press \'d\' to covert in degrees ')
+    #     print('------- Press any key to continue --------')
+    #     if inp =='d':
+    #         mode = 'degree'
+ 
+    parts = re.split(r'([+\-*^/])',exp)
+    parts = [part.strip().lower() for part in parts if part.strip()] 
+    #remove one sided brackets:
+    for i, ele in enumerate(parts):
+        if ele[-1]==')':
+            bracket = ele[-1]
+            no =ele[:-1]
+            parts.insert(i,no)
+            parts.insert(i+1,bracket) 
+        elif ele[0]=='(':
+            bracket =ele[0]
+            no =ele[1:]
+            parts.insert(i, bracket)
+            parts.insert(i+1,no)
+  
+           
+    # exp = infix_to_postfix(parts)
 
-        parts = [part.strip() for part in parts if part.strip()]
+    print(parts,'the expression ')
+#     if "calculate" in exp:
+#         exp = exp[9:] #after calculate_
+#         parts = re.split(r'([+\-*/])',exp) #splits the expression
+#         print(parts,'fjfj')
 
-        result =0
-        operator = '+'
-        arr = []
-        for element in (parts):
+       
+     
+        
+#         print(parts, 'bd wala')
 
-            if element.isnumeric():
-                number= float(element)
-                result = calculate(result, operator, number)
-            elif element.startswith('sin(') or element.startswith('cos(') or element.startswith('tan('):
-                theta = float(element[4:-1])
-                opr = element[:3]
-                result = calc_trig(result, theta, number , opr)
-            elif element =='(':
-                arr.append((result, operator)) # store the result and opr before the bracket to use after
-                result =0 
-                operator = '+'
-            elif element == ')':
-                pr_result, pr_opr = arr.pop()
-                result = calculate(pr_result, pr_opr, result)
-            else : 
-                operator = element
+        
+#         operator = '+'
+#         temp = []
+#         ans = [0]
+#         for element in (parts):
+#             print(element)
+
+#             if element.isnumeric():
+#                 number= float(element)
+#                 previous = ans[-1]
+#                 exp = 'number operator previous'
+#                 result = eval(number)
+#                 ans.append(result)
+#             elif element.startswith('sin') or element.startswith('cos') or element.startswith('tan'):
+#                 theta = float(element[4:-1])
+#                 if mode == 'degree':
+#                     theta =math.radians(theta)
+#                 opr = element[:3]
+#                 result = calc_trig( theta , opr)
+#                 ans.append(result)
+#             elif element.startswith('(') :
+            
+#                 number = float(element [1:]) # remove the bracket
+#                 previous = ans[-1]
+#                 exp = str(number)+str(operator)+str(previous)
+#                 result = eval(exp)
+#                 ans.append(result)
+        
+#             else : 
+#                 operator = element
+#         sum1 =sum(ans)
+#         return sum1
 
 
 
@@ -45,34 +127,24 @@ def callCalculate(name,exp):
 
       
             
-        return eval(exp)
-    else:
-        exp = exp[5:] # after solve_
-        return eval(exp)
+#         # return eval(exp)
+#     # else:
+#     #     exp = exp[5:] # after solve_
+#     #     return eval(exp)
     
-def calc_trig(result, theta, num, opr):
-    if opr.lower() =='sin':
-        return math.sin(theta) +result
-    elif opr.lower() =='cos':
-        return math.cos(theta) +result
-    elif opr.lower() =='tan':
-        return math.tan(theta) +result # arc tan etc 'll be added
+# def calc_trig(theta,opr):
+#     if opr.lower() =='sin':
+#         return math.sin(theta) 
+#     elif opr.lower() =='cos':
+#         return math.cos(theta) 
+#     elif opr.lower() =='tan':
+#         return math.tan(theta)# arc tan etc 'll be added
     
 
-def calculate(num1, opr, num2):
-    if opr == '+':
-        return num1 + num2
-    elif opr == '-':
-         return num1 - num2
-    elif opr == '*':
-         return num1 * num2
-    elif opr == '/':
-        if num2 != 0:
-            return num1 / num2
-        else:
-            raise ValueError("Cannot divide by zero.")
+
         
-expression = "calculate sin(30) + sin(30)"
+expression = "calculate (sin(45) + 2) * (3^2 - cos(30))"
+
 name = 'Anas'
 result = callCalculate(name,expression)
 print("Result:", result)
